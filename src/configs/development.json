@@ -1,0 +1,10 @@
+{
+    "env": "development",
+    "dbConfig": {
+        "host": "localhost",
+        "database": "mongoose",
+        "port": 27017,
+        "url": "mongodb+srv://admin:jay@123$@jay-service-test.xfkcb.mongodb.net/myFirstDatabase?retryWrites=true&w=majority"
+    },
+    "secretKey": "secretKey"
+}
