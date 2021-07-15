@@ -1,39 +1,25 @@
-import { NotificationModel } from '@/interfaces/notification.interface';
-import { model, Schema, Document } from 'mongoose';
-const notificationSchema = new Schema(
-  {
-    // id của công việc
-    data: {
-      type: Object,
-    },
-    topic: {
-      type: Schema.Types.ObjectId,
-      required: true,
-    },
-    title: {
-      type: String,
-    },
-    body: {
-      type: String,
-    },
-    type: {
-      type: String,
-      required: true,
-    },
-    isRead: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  {
-    collection: "notification",
-    autoIndex: false,
-    timestamps: {
-      createdAt: "create_at",
-      updatedAt: "update_at",
-    },
-  }
-);
+import { BaseFormatter } from './BaseFormatter';
 
-const Notification = model<NotificationModel & Document>("notification", notificationSchema);
-export default Notification;
+export interface INotificationModel {
+  _id?: string;
+  id?: string;
+  data?: object;
+  topic?: string;
+  title?: string;
+  body?: string;
+  type?: string;
+  isRead?: boolean;
+}
+
+export class NotificationFormatter extends BaseFormatter implements INotificationModel {
+  data = undefined;
+  topic = undefined;
+  title = undefined;
+  body = undefined;
+  type = undefined;
+  isRead = undefined;
+  constructor(args: any) {
+    super();
+    this.format(args);
+  }
+}

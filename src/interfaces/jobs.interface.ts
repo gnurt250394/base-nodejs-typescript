@@ -1,31 +1,37 @@
 import { Model, Schema } from 'mongoose';
-export interface JobModel {
+import { BaseParams } from './base.interface';
+export interface Job {
   //tên công việc
-  name: string
+  name: string;
   // id của công ty
-  partnerId: string
-  latitude: number
-  longitude: number
+  partnerId: string;
+  latitude: number;
+  longitude: number;
   // địa chỉ
-  address: string
+  address: string;
   // mức lương
-  fromPrice: number
+  fromPrice: number;
   // mức lương
-  toPrice: number
+  toPrice: number;
   // mảng lĩnh vực
-  fieldId: string[]
+  fieldId: string[];
   // trình độ
-  level: string
+  level: string;
 
-  deadline: number
-  timeStart: number
-  timeEnd: number
+  deadline: number;
+  timeStart: number;
+  timeEnd: number;
   // mô tả công việc
-  description: string
+  description: string;
   // yêu cầu với ứng viên
-  candidateRequest: string
+  candidateRequest: string;
   // quyền lợi
-  interest: string
-  active: boolean
-  status: boolean
+  interest: string;
+  active: boolean;
+  status: boolean;
+}
+export interface JobParams extends BaseParams {
+  fieldId?: string;
+  latitude?: number;
+  longitude?: number;
 }

@@ -1,6 +1,5 @@
 import { Model, Schema } from 'mongoose';
-export interface FieldModel {
-  name: string
-  note: string
+export interface Field {
+  name: string;
+  note: string;
 }
-

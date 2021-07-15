@@ -1,6 +1,6 @@
 import { Model, Schema } from 'mongoose';
-export interface ProvinceModel {
-  name: string
-  id_city: string
-  type: string
+export interface Province {
+  name: string;
+  id_city: string;
+  type: string;
 }

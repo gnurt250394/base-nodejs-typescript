@@ -1,29 +1,21 @@
-import { CommuneModel } from '@/interfaces/commune.interface';
-import { model, Schema, Document } from 'mongoose';
-const usersSchema = new Schema(
-  {
-    name: {
-      type: String,
-    },
-    id_district: {
-      type: String,
-    },
-    id_commune: {
-      type: String,
-    },
-    type: {
-      type: String,
-    },
-  },
-  {
-    collection: "commune",
-    autoIndex: false,
-    timestamps: {
-      createdAt: "create_at",
-      updatedAt: "update_at",
-    },
-  }
-);
+import { BaseFormatter } from './BaseFormatter';
 
-const users = model<CommuneModel & Document>("commune", usersSchema);
-export default users;
+export interface ICommuneModel {
+  _id?: string;
+  id?: string;
+  name?: string;
+  id_district?: string;
+  id_commune?: string;
+  type?: string;
+}
+
+export class CommuneFormatter extends BaseFormatter implements ICommuneModel {
+  name = undefined;
+  id_commune = undefined;
+  id_district = undefined;
+  type = undefined;
+  constructor(args: any) {
+    super();
+    this.format(args);
+  }
+}

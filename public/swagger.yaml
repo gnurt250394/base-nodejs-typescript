@@ -1,0 +1,632 @@
+components:
+    examples: {}
+    headers: {}
+    parameters: {}
+    requestBodies: {}
+    responses: {}
+    schemas:
+        GenderType:
+            type: string
+            enum:
+                - male
+                - female
+        RoleType:
+            type: string
+            enum:
+                - user
+                - admin
+                - partner
+        LevelType:
+            type: string
+            enum:
+                - unskilled
+                - secondary
+                - high
+                - students
+                - university
+                - postgraduate
+        IUserModel:
+            properties:
+                _id:
+                    type: string
+                id:
+                    type: string
+                accessToken:
+                    type: string
+                name:
+                    type: string
+                email:
+                    type: string
+                dob:
+                    type: string
+                password:
+                    type: string
+                phone:
+                    type: string
+                gender:
+                    $ref: '#/components/schemas/GenderType'
+                latitude:
+                    type: number
+                    format: double
+                longitude:
+                    type: number
+                    format: double
+                avatar:
+                    type: string
+                role:
+                    $ref: '#/components/schemas/RoleType'
+                address:
+                    type: string
+                province_id:
+                    type: string
+                commune_id:
+                    type: string
+                district_id:
+                    type: string
+                overview:
+                    type: string
+                level:
+                    $ref: '#/components/schemas/LevelType'
+                skill:
+                    type: string
+                experience:
+                    type: string
+                active:
+                    type: boolean
+                loginToken:
+                    type: string
+                fieldId:
+                    items: {}
+                    type: array
+                fields: {}
+            type: object
+            additionalProperties: true
+        AuthDto:
+            properties:
+                phone:
+                    type: string
+                    pattern: '(84|0[3|5|7|8|9])+([0-9]{8})\b'
+                password:
+                    type: string
+                accessToken:
+                    type: string
+                longitude:
+                    type: number
+                    format: double
+                latitude:
+                    type: number
+                    format: double
+                address:
+                    type: string
+            required:
+                - phone
+                - password
+            type: object
+            additionalProperties: true
+        ValidateErrorJSON:
+            properties:
+                message:
+                    type: string
+                    enum:
+                        - 'Validation failed'
+                    nullable: false
+                details:
+                    properties: {}
+                    additionalProperties: {}
+                    type: object
+            required:
+                - message
+                - details
+            type: object
+            additionalProperties: true
+        ICommuneModel:
+            properties:
+                _id:
+                    type: string
+                id:
+                    type: string
+                name:
+                    type: string
+                id_district:
+                    type: string
+                id_commune:
+                    type: string
+                type:
+                    type: string
+            type: object
+            additionalProperties: true
+        IPaginationModel:
+            properties:
+                totalElement:
+                    type: number
+                    format: double
+                    description: 'tsoa doesn''t like generics'
+                page:
+                    type: number
+                    format: double
+                limit:
+                    type: number
+                    format: double
+                totalPages:
+                    type: number
+                    format: double
+                data:
+                    items: {}
+                    type: array
+            required:
+                - totalElement
+                - page
+                - limit
+                - totalPages
+                - data
+            type: object
+            additionalProperties: true
+        IDistrictModel:
+            properties:
+                _id:
+                    type: string
+                id:
+                    type: string
+                name:
+                    type: string
+                id_district:
+                    type: string
+                id_city:
+                    type: string
+                type:
+                    type: string
+            type: object
+            additionalProperties: true
+        IProvinceModel:
+            properties:
+                _id:
+                    type: string
+                id:
+                    type: string
+                name:
+                    type: string
+                id_city:
+                    type: string
+                type:
+                    type: string
+            type: object
+            additionalProperties: true
+    securitySchemes:
+        admin:
+            type: apiKey
+            name: Authorization
+            in: header
+info:
+    title: DemoService
+    version: 1.3.0
+    description: 'User management API'
+    license:
+        name:
+            name: 'Apache 2.0'
+            url: 'https://www.apache.org/licenses/LICENSE-2.0.html'
+    contact:
+        name: 'JAY Team'
+        email: gnurt250394@gmail.com
+        url: 'https://www.wolox.com.ar/'
+openapi: 3.0.0
+paths:
+    /auth/login:
+        post:
+            operationId: Login
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IUserModel'
+                '400':
+                    description: 'Bad request'
+            tags:
+                - auth
+            security: []
+            parameters:
+                -
+                    in: header
+                    name: role
+                    required: true
+                    schema:
+                        $ref: '#/components/schemas/RoleType'
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AuthDto'
+    /auth/register:
+        post:
+            operationId: Signup
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IUserModel'
+                '400':
+                    description: 'Validation Failed'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidateErrorJSON'
+            tags:
+                - auth
+            security: []
+            parameters:
+                -
+                    in: header
+                    name: role
+                    required: true
+                    schema:
+                        $ref: '#/components/schemas/RoleType'
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AuthDto'
+    /auth/forgot-password:
+        post:
+            operationId: ForgotPassword
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IUserModel'
+                '400':
+                    description: 'Validation Failed'
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ValidateErrorJSON'
+            tags:
+                - auth
+            security: []
+            parameters:
+                -
+                    in: header
+                    name: role
+                    required: true
+                    schema:
+                        $ref: '#/components/schemas/RoleType'
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/AuthDto'
+    '/address/commune/detail/{id}':
+        get:
+            operationId: GetById
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/ICommuneModel'
+            tags:
+                - address
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: id
+                    required: true
+                    schema:
+                        type: string
+    '/address/commune/{id}':
+        get:
+            operationId: GetPaginated
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IPaginationModel'
+            tags:
+                - address
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: id
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: query
+                    name: page
+                    required: true
+                    schema:
+                        format: double
+                        type: number
+                -
+                    in: query
+                    name: size
+                    required: true
+                    schema:
+                        format: double
+                        type: number
+                -
+                    in: query
+                    name: fields
+                    required: false
+                    schema:
+                        type: string
+                -
+                    in: query
+                    name: sort
+                    required: false
+                    schema:
+                        type: string
+    '/address/district/detail/{id}':
+        get:
+            operationId: GetById
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IDistrictModel'
+            tags:
+                - address
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: id
+                    required: true
+                    schema:
+                        type: string
+    '/address/district/{id}':
+        get:
+            operationId: GetPaginated
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IPaginationModel'
+            tags:
+                - address
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: id
+                    required: true
+                    schema:
+                        type: string
+                -
+                    in: query
+                    name: page
+                    required: true
+                    schema:
+                        format: double
+                        type: number
+                -
+                    in: query
+                    name: size
+                    required: true
+                    schema:
+                        format: double
+                        type: number
+                -
+                    in: query
+                    name: fields
+                    required: false
+                    schema:
+                        type: string
+                -
+                    in: query
+                    name: sort
+                    required: false
+                    schema:
+                        type: string
+    '/address/province/detail/{id}':
+        get:
+            operationId: GetById
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IProvinceModel'
+            tags:
+                - address
+            security: []
+            parameters:
+                -
+                    in: path
+                    name: id
+                    required: true
+                    schema:
+                        type: string
+    /address/province:
+        get:
+            operationId: GetPaginated
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IPaginationModel'
+            tags:
+                - address
+            security: []
+            parameters:
+                -
+                    in: query
+                    name: page
+                    required: true
+                    schema:
+                        format: double
+                        type: number
+                -
+                    in: query
+                    name: size
+                    required: true
+                    schema:
+                        format: double
+                        type: number
+                -
+                    in: query
+                    name: fields
+                    required: false
+                    schema:
+                        type: string
+                -
+                    in: query
+                    name: sort
+                    required: false
+                    schema:
+                        type: string
+    /medical-record/detail:
+        get:
+            operationId: GetById
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IUserModel'
+            tags:
+                - medical-record
+            security:
+                -
+                    admin: []
+            parameters: []
+    /medical-record/list-medical-record:
+        get:
+            operationId: GetPaginated
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IPaginationModel'
+            tags:
+                - medical-record
+            security: []
+            parameters:
+                -
+                    in: query
+                    name: page
+                    required: true
+                    schema:
+                        format: double
+                        type: number
+                -
+                    in: query
+                    name: limit
+                    required: true
+                    schema:
+                        format: double
+                        type: number
+                -
+                    in: query
+                    name: fields
+                    required: false
+                    schema:
+                        type: string
+                -
+                    in: query
+                    name: sort
+                    required: false
+                    schema:
+                        type: string
+                -
+                    in: query
+                    name: q
+                    required: false
+                    schema:
+                        type: string
+    /medical-record:
+        post:
+            operationId: Create
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IUserModel'
+                '400':
+                    description: 'Bad request'
+            tags:
+                - medical-record
+            security:
+                -
+                    admin: []
+            parameters: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/IUserModel'
+    '/medical-record/{id}':
+        put:
+            operationId: Update
+            responses:
+                '200':
+                    description: Ok
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/IUserModel'
+                '400':
+                    description: 'Bad request'
+            tags:
+                - medical-record
+            security:
+                -
+                    admin: []
+            parameters:
+                -
+                    in: path
+                    name: id
+                    required: true
+                    schema:
+                        type: string
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/IUserModel'
+        delete:
+            operationId: Delete
+            responses:
+                '204':
+                    description: 'No content'
+            tags:
+                - medical-record
+            security:
+                -
+                    admin: []
+            parameters:
+                -
+                    in: path
+                    name: id
+                    required: true
+                    schema:
+                        type: string
+servers:
+    -
+        url: /api/v1

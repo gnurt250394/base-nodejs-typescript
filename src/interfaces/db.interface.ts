@@ -3,4 +3,5 @@ export interface dbConfig {
   port: number;
   database: string;
   url: string;
+  agendaPoolTime: string;
 }

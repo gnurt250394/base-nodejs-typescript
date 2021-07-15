@@ -1,50 +1,41 @@
-import { NextFunction, Request, Response, } from 'express';
-import { CreateUserDto } from '@dtos/users.dto';
-import { RequestWithUser } from '@interfaces/auth.interface';
-import { User } from '@interfaces/users.interface';
-import AuthService from '@services/auth.service';
-
-class AuthController {
-  public authService = new AuthService();
-
-  public signUp = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-    try {
-      const userData: CreateUserDto = req.body;
-      const { role } = req.headers
-      const signUpUserData: User = await this.authService.signup(userData, role);
-
-      res.status(201).json(signUpUserData);
-    } catch (error) {
-      next(error);
-    }
-  };
-
-  public logIn = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-    try {
-      const userData: CreateUserDto = req.body;
-      const { role } = req.headers
-      const { cookie, response } = await this.authService.login(userData, role);
-
-      res.setHeader('Set-Cookie', [cookie]);
-      res.status(200).json(response);
-    } catch (error) {
-      console.log('error: ', error);
-      next(error);
-    }
-  };
-
-  public logOut = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-    try {
-      const userData: User = req.user;
-      const { role } = req.headers
-      const logOutUserData: User = await this.authService.logout(userData, role);
-
-      res.setHeader('Set-Cookie', ['Authorization=; Max-age=0']);
-      res.status(200).json(logOutUserData);
-    } catch (error) {
-      next(error);
-    }
-  };
+import { RoleType } from '@/common/Constants';
+import { AuthDto } from '@/dtos/auth.dto';
+import { inject, ProvideSingleton } from '@/ioc';
+import { IUserModel } from '@/models/user.model';
+import { UserService } from '@/services/user.service';
+import { Body, Controller, Header, Post, Response, Route, Tags } from 'tsoa';
+interface ValidateErrorJSON {
+  message: 'Validation failed';
+  details: { [name: string]: unknown };
 }
+@Tags('auth')
+@Route('auth')
+@ProvideSingleton(AuthController)
+export class AuthController extends Controller {
+  constructor(@inject(UserService) private service: UserService) {
+    super();
+  }
 
-export default AuthController;
+  @Response(400, 'Bad request')
+  @Post('login')
+  public async login(@Body() body: AuthDto, @Header() role: RoleType): Promise<IUserModel> {
+    let user = await this.service.login(body, role);
+    return user;
+  }
+
+  @Response<ValidateErrorJSON>(400, 'Validation Failed')
+  @Post('register')
+  public async signup(@Body() body: AuthDto, @Header() role: RoleType): Promise<IUserModel> {
+    let user = await this.service.signup(body, role);
+    console.log('user: ', user);
+    return user;
+  }
+
+  @Response<ValidateErrorJSON>(400, 'Validation Failed')
+  @Post('forgot-password')
+  public async forgotPassword(@Body() body: AuthDto, @Header() role: RoleType): Promise<IUserModel> {
+    let user = await this.service.forgotPassword(body, role);
+    console.log('user: ', user);
+    return user;
+  }
+}

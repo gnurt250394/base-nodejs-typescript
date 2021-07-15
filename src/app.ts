@@ -1,62 +1,67 @@
-process.env['NODE_CONFIG_DIR'] = __dirname + '/configs';
-
+import { RegisterRoutes } from '@/routes';
+import constants from '@configs/constants';
+import handlePreRequestMiddleware from '@middlewares/error.middleware';
+import { Logger, stream } from '@utils/logger';
 import compression from 'compression';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import express from 'express';
+import admin from 'firebase-admin';
 import helmet from 'helmet';
 import hpp from 'hpp';
 import morgan from 'morgan';
-import { connect, set } from 'mongoose';
-import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import { dbConnection } from '@databases';
-import Routes from '@interfaces/routes.interface';
-import errorMiddleware from '@middlewares/error.middleware';
-import { logger, stream } from '@utils/logger';
-
+import { ErrorHandler } from './exceptions/ErrorHandler';
+interface ValidateErrorJSON {
+  message: 'Validation failed';
+  details: { [name: string]: unknown };
+}
 class App {
   public app: express.Application;
   public port: string | number;
   public env: string;
 
-  constructor(routes: Routes[]) {
+  constructor() {
     this.app = express();
-    this.port = process.env.PORT || 3000;
+    this.port = 8769;
     this.env = process.env.NODE_ENV || 'development';
 
-    this.connectToDatabase();
+    this.initializeFirebase();
     this.initializeMiddlewares();
-    this.initializeRoutes(routes);
+    this.initializeRoutes();
     this.initializeSwagger();
     this.initializeErrorHandling();
   }
+  private initializeFirebase() {
+    try {
+      const serviceAccount = require('@configs/notification/keys/serviceAccountKey.json');
+
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount),
+        databaseURL: constants.firebaseUrl,
+      });
+    } catch (error) {
+      console.log('error: ', error);
+    }
+  }
 
   public listen() {
+    process.on('uncaughtException', this.criticalErrorHandler);
+    process.on('unhandledRejection', this.criticalErrorHandler);
     this.app.listen(this.port, () => {
-      logger.info(`=================================`);
-      logger.info(`======= ENV: ${this.env} =======`);
-      logger.info(`🚀 App listening on the port ${this.port}`);
-      logger.info(`=================================`);
+      Logger.info(`=================================`);
+      Logger.info(`======= ENV: ${this.env} =======`);
+      Logger.info(`🚀 App listening on the port ${this.port}`);
+      Logger.info(`=================================`);
     });
+  }
+  private criticalErrorHandler(...args) {
+    Logger.error('Critical Error...', ...args);
+    process.exit(1);
   }
 
   public getServer() {
     return this.app;
-  }
-
-  private connectToDatabase() {
-    if (this.env !== 'production') {
-      set('debug', true);
-    }
-
-    connect(dbConnection.url, dbConnection.options).then(response=>{
-      logger.info(`=================connected db================`);
-
-    }).catch(error=>{
-      logger.error(`=================error connect db================: ${error}`);
-
-    })
   }
 
   private initializeMiddlewares() {
@@ -67,88 +72,45 @@ class App {
       this.app.use(morgan('dev', { stream }));
       this.app.use(cors({ origin: true, credentials: true }));
     }
-
     this.app.use(hpp());
     this.app.use(helmet());
     this.app.use(compression());
     this.app.use(express.json());
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cookieParser());
+    this.app.use(constants.upload, express.static('uploads'));
   }
 
-  private initializeRoutes(routes: Routes[]) {
-    routes.forEach(route => {
-      this.app.use('/api/v1/', route.router);
-    });
+  private initializeRoutes() {
+    try {
+      this.app.use(handlePreRequestMiddleware);
+      RegisterRoutes(this.app);
+    } catch (error) {
+      console.log('error: ', error);
+    }
   }
 
   private initializeSwagger() {
-    const options = {
-      swaggerDefinition: {
-        info: {
-          title: "JAY API",
-          description: "This is a sample Post API",
-          version: '1.0.0'
+    this.app.use(express.static('public'));
+    // const swaggerDocument = require('../build/swagger/swagger.yaml');
+    // this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+    // this.app.use('/api-docs', express.static(__dirname + '/swagger-ui'));
+    // this.app.use('/swagger.yaml', (req, res) => {
+    //   res.sendFile(__dirname + '/swagger.yaml');
+    // });
+    this.app.use(
+      '/api-docs',
+      swaggerUi.serve,
+      swaggerUi.setup(undefined, {
+        swaggerOptions: {
+          url: '/swagger.yaml',
         },
-        // openapi: '3.0.0',
-        // Like the one described here: https://swagger.io/specification/#infoObject
-        contact: {
-          name: "Gnurt",
-          url: "http://www.swagger.io/support",
-          email: "gnurt250394@gmail.com",
-        },
-        basePath: "/api/v1",
-        tags: [
-          {
-            name: "medical-record",
-            description: "API for medical-record in the system",
-          },
-          {
-            name: "jobs",
-            description: "API for jobs in the system",
-          },
-          {
-            name: "address",
-            description: "API for address in the system",
-          },
-          {
-            name: "auth",
-            description: "API for auth in the system",
-          },
-          {
-            name: "fields",
-            description: "API for fields in the system",
-          },
-        ],
-        securityDefinitions: {
-          Bearer: {
-            type: "apiKey",
-            name: "Authorization",
-            in: "header",
-          },
-        },
-        servers: [
-          {
-            url: "http://localhost:8769",
-            description:
-              "Optional server description, e.g. Internal staging server for testing",
-          },
-          {
-            url: "http://13.115.114.254:8769",
-            description:
-              "Optional server description, e.g. Main (production) server",
-          },
-        ],
-      },
-      apis: ['swagger.yaml'],
-    }
-
-    const specs = swaggerJSDoc(options);
-    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+      }),
+    );
   }
 
   private initializeErrorHandling() {
-    this.app.use(errorMiddleware);
+    this.app.use(ErrorHandler.handleError);
   }
 }
 

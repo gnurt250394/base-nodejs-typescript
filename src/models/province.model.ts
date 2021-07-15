@@ -1,25 +1,19 @@
-import { ProvinceModel } from '@/interfaces/province.interface';
-import { model, Schema, Document } from 'mongoose';
-const provinceSchema = new Schema(
-  {
-    name: {
-      type: String,
-    },
-    id_city: {
-      type: String,
-    },
-    type: {
-      type: String,
-    },
-  },
-  {
-    collection: "province",
-    autoIndex: false,
-    timestamps: {
-      createdAt: "create_at",
-      updatedAt: "update_at",
-    },
+import { BaseFormatter } from './BaseFormatter';
+
+export interface IProvinceModel {
+  _id?: string;
+  id?: string;
+  name?: string;
+  id_city?: string;
+  type?: string;
+}
+
+export class ProvinceFormatter extends BaseFormatter implements IProvinceModel {
+  name = undefined;
+  id_city = undefined;
+  type = undefined;
+  constructor(args: any) {
+    super();
+    this.format(args);
   }
-);
-const province = model<ProvinceModel & Document>("province", provinceSchema);
-export default province
+}

@@ -1,0 +1,120 @@
+{
+  "entryFile": "src/server.ts",
+  "controllerPathGlobs": [
+    "src/**/*.controller.ts"
+  ],
+  "spec": {
+    "outputDirectory": "public",
+    "version": "1.3.0",
+    "title": "Users",
+    "description": "User management API",
+    "termsOfService": "http://api_url/terms/",
+    "contact": {
+      "name": "JAY Team",
+      "email": "gnurt250394@gmail.com",
+      "url": "https://www.wolox.com.ar/"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0.html"
+    },
+    "basePath": "/api/v1",
+    "securityDefinitions": {
+      "admin": {
+        "type": "apiKey",
+        "name": "Authorization",
+        "in": "header"
+      }
+    },
+    "servers": [
+      {
+        "url": "https://test.project.com/project-api",
+        "description": "Test server"
+      },
+      {
+        "url": "https://project.com/project-api",
+        "description": "Production server"
+      },
+      {
+        "url": "http://localhost:3000/project-api",
+        "description": "local dev server"
+      }
+    ],
+    "specVersion": 3,
+    "yaml": true
+  },
+  "swagger": {
+    "entryFile": "./build/routes.ts",
+    "outputDirectory": "./public",
+    "specMerging": "recursive",
+    "spec": {
+      "servers": [
+        {
+          "url": "https://test.project.com/project-api",
+          "description": "Test server"
+        },
+        {
+          "url": "https://project.com/project-api",
+          "description": "Production server"
+        },
+        {
+          "url": "http://localhost:3000/project-api",
+          "description": "local dev server"
+        }
+      ]
+    }
+  },
+  "routes": {
+    "basePath": "/api/v1",
+    "entryFile": "./src/server.ts",
+    "routesDir": "./src",
+    "middleware": "express",
+    "middlewareTemplate": "",
+    "iocModule": "src/ioc",
+    "authenticationModule": "./src/auth.ts"
+  },
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@/*": [
+        "*"
+      ],
+      "@controllers/*": [
+        "controllers/*"
+      ],
+      "@databases": [
+        "databases"
+      ],
+      "@dtos/*": [
+        "dtos/*"
+      ],
+      "@exceptions/*": [
+        "exceptions/*"
+      ],
+      "@interfaces/*": [
+        "interfaces/*"
+      ],
+      "@middlewares/*": [
+        "middlewares/*"
+      ],
+      "@models/*": [
+        "models/*"
+      ],
+      "@routes/*": [
+        "routes/*"
+      ],
+      "@services/*": [
+        "services/*"
+      ],
+      "@utils/*": [
+        "utils/*"
+      ],
+      "@configs/*": [
+        "configs/*"
+      ],
+      "@repositories/*": [
+        "@repositories/*"
+      ]
+    }
+  }
+}

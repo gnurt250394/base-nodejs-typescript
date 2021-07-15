@@ -1,17 +1,25 @@
+import { Logger } from '@utils/logger';
 import { NextFunction, Request, Response } from 'express';
-import HttpException from '@exceptions/HttpException';
-import { logger } from '@utils/logger';
 
-const errorMiddleware = (error: HttpException, req: Request, res: Response, next: NextFunction) => {
+const handlePreRequestMiddleware = (req: Request, res: Response, next: NextFunction) => {
   try {
-    const status: number = error.status || 500;
-    const message: string = error.message || 'Something went wrong';
-
-    logger.error(`[${req.method}] ${req.path} >> StatusCode:: ${status}, Message:: ${message}`);
-    res.status(status).json({ message });
+    const { body, query, params, headers } = req;
+    if (Object.keys(headers)?.length) {
+      Logger.info('HEADER-CONTENT: ', headers);
+    }
+    if (Object.keys(body)?.length) {
+      Logger.info('BODY-CONTENT: ', body);
+    }
+    if (Object.keys(query)?.length) {
+      Logger.info('QUERY-CONTENT: ', query);
+    }
+    if (Object.keys(params)?.length) {
+      Logger.info('PARAMS-CONTENT: ', params);
+    }
+    next();
   } catch (error) {
     next(error);
   }
 };
 
-export default errorMiddleware;
+export default handlePreRequestMiddleware;

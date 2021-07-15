@@ -1,3 +1,4 @@
+import constants from '@/configs/constants';
 import fs from 'fs';
 import winston from 'winston';
 import winstonDaily from 'winston-daily-rotate-file';
@@ -10,14 +11,14 @@ if (!fs.existsSync(logDir)) {
 }
 
 // Define log format
-const logFormat = winston.format.printf(({ timestamp, level, message }) => `${timestamp} ${level}: ${message}`);
-
+const logFormat = winston.format.printf(({ timestamp, level, message }) => `[${timestamp}] [${level}]: ${message}`);
 /*
  * Log Level
  * error: 0, warn: 1, info: 2, http: 3, verbose: 4, debug: 5, silly: 6
  */
 const logger = winston.createLogger({
   format: winston.format.combine(
+    winston.format.colorize(),
     winston.format.timestamp({
       format: 'YYYY-MM-DD HH:mm:ss',
     }),
@@ -47,7 +48,35 @@ const logger = winston.createLogger({
     }),
   ],
 });
+class Logger {
+  public static readonly shouldLog: boolean = constants.environment !== 'test';
+  public static readonly console = logger;
 
+  public static log(...args: any[]): void {
+    if (Logger.shouldLog) Logger.console.debug(Logger.formatArgs(args));
+  }
+
+  public static warn(...args: any[]): void {
+    if (Logger.shouldLog) Logger.console.warn(Logger.formatArgs(args));
+  }
+
+  public static error(...args: any[]): void {
+    if (Logger.shouldLog) Logger.console.error(Logger.formatArgs(args));
+  }
+
+  public static info(...args: any[]): void {
+    if (Logger.shouldLog) Logger.console.info(Logger.formatArgs(args));
+  }
+
+  public static verbose(...args: any[]): void {
+    if (Logger.shouldLog) Logger.console.verbose(Logger.formatArgs(args));
+  }
+
+  private static formatArgs(args: any[]): string {
+    if (args.length <= 1) args = args[0];
+    return JSON.stringify(args, null, 4);
+  }
+}
 logger.add(
   new winston.transports.Console({
     format: winston.format.combine(winston.format.splat(), winston.format.colorize()),
@@ -55,9 +84,9 @@ logger.add(
 );
 
 const stream = {
-  write: (message: string) => {
-    logger.info(message.substring(0, message.lastIndexOf('\n')));
+  write: (chunk: string) => {
+    logger.info(chunk.substring(0, chunk.lastIndexOf('\n')));
   },
 };
 
-export { logger, stream };
+export { Logger, stream };
