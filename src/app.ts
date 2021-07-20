@@ -11,7 +11,9 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 import morgan from 'morgan';
 import swaggerUi from 'swagger-ui-express';
+import { SQLSetupHelper } from './configs/SQLSetupHelper';
 import { ErrorHandler } from './exceptions/ErrorHandler';
+import { iocContainer } from './ioc';
 interface ValidateErrorJSON {
   message: 'Validation failed';
   details: { [name: string]: unknown };
@@ -45,9 +47,11 @@ class App {
     }
   }
 
-  public listen() {
+  public async listen() {
     process.on('uncaughtException', this.criticalErrorHandler);
     process.on('unhandledRejection', this.criticalErrorHandler);
+    const sqlHelper = iocContainer.get<SQLSetupHelper>(SQLSetupHelper);
+    await sqlHelper.sync({ force: false });
     this.app.listen(this.port, () => {
       Logger.info(`=================================`);
       Logger.info(`======= ENV: ${this.env} =======`);

@@ -1,26 +1,24 @@
-// import { decorate, injectable } from 'inversify';
-// import * as Sequelize from 'sequelize';
+import { decorate, injectable } from 'inversify';
+import { Sequelize, ModelAttributes, ModelOptions, ModelCtor, SyncOptions } from 'sequelize';
 
-// import { SQLDbConnection } from '../../../config/SQLDbConnection';
-// import { Logger } from '../../../config/Logger';
+import { SQLDbConnection } from '@configs/SQLDbConnection';
+import { Logger } from '@/utils/logger';
 
-// export abstract class BaseEntity {
-//   public entityName: string;
-//   public model: Sequelize.Model<any, any>;
-//   protected sqlDbConnection: SQLDbConnection;
-//   protected attributes: Sequelize.DefineAttributes;
-//   protected options: Sequelize.DefineOptions<any>;
+export abstract class BaseEntity {
+  public entityName: string;
+  public model: ModelCtor<any>;
+  protected sqlDbConnection: SQLDbConnection;
+  protected attributes: ModelAttributes;
+  protected options: ModelOptions<any>;
 
-//   protected initModel(): void {
-//     this.model = this.sqlDbConnection.db.define(this.entityName, this.attributes, this.options);
-//   }
+  protected initModel(): void {
+    this.model = this.sqlDbConnection.db.define(this.entityName, this.attributes, this.options);
+  }
 
-//   protected sync(options?: Sequelize.SyncOptions): Promise<any> {
-//     Logger.log(
-//       `synchronizing: ${this.entityName}${options ? ` with options: ${JSON.stringify(options)}` : ''}`
-//     );
-//     return this.model.sync(options) as any;
-//   }
-// }
+  protected sync(options?: SyncOptions): Promise<any> {
+    Logger.log(`synchronizing: ${this.entityName}${options ? ` with options: ${JSON.stringify(options)}` : ''}`);
+    return this.model.sync(options) as any;
+  }
+}
 
-// decorate(injectable(), BaseEntity);
+decorate(injectable(), BaseEntity);
